@@ -1,5 +1,5 @@
 import os
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 import joblib
 import numpy as np
@@ -10,15 +10,91 @@ from sklearn.preprocessing import StandardScaler
 from config import MODEL_DIR
 from preprocess import load_housing_data, preprocess_ames
 
-FEATURES: List[str] = [
-    "Gr_Liv_Area",
-    "Overall_Qual",
-    "Garage_Cars",
-    "Total_Bsmt_SF",
-    "1st_Flr_SF",
+
+FEATURE_INFO: List[Dict[str, str]] = [
+    {
+        "name": "MS_SubClass",
+        "raw": "MS SubClass",
+        "label": "MS SubClass – Building class (Phân loại nhà)",
+    },
+    {
+        "name": "Lot_Area",
+        "raw": "Lot Area",
+        "label": "Lot Area – Diện tích lô đất (sqft)",
+    },
+    {
+        "name": "Overall_Qual",
+        "raw": "Overall Qual",
+        "label": "Overall Qual – Chất lượng tổng thể (1-10)",
+    },
+    {
+        "name": "Overall_Cond",
+        "raw": "Overall Cond",
+        "label": "Overall Cond – Tình trạng tổng thể (1-9)",
+    },
+    {
+        "name": "Year_Built",
+        "raw": "Year Built",
+        "label": "Year Built – Năm xây dựng",
+    },
+    {
+        "name": "Gr_Liv_Area",
+        "raw": "Gr Liv Area",
+        "label": "Gr Liv Area – Diện tích sàn sử dụng trên mặt đất (sqft)",
+    },
+    {
+        "name": "Garage_Cars",
+        "raw": "Garage Cars",
+        "label": "Garage Cars – Số chỗ để xe trong garage",
+    },
+    {
+        "name": "Garage_Area",
+        "raw": "Garage Area",
+        "label": "Garage Area – Diện tích garage (sqft)",
+    },
+    {
+        "name": "Total_Bsmt_SF",
+        "raw": "Total Bsmt SF",
+        "label": "Total Bsmt SF – Tổng diện tích tầng hầm (sqft)",
+    },
+    {
+        "name": "Full_Bath",
+        "raw": "Full Bath",
+        "label": "Full Bath – Số phòng tắm đầy đủ",
+    },
 ]
+
+FEATURES: List[str] = [info["name"] for info in FEATURE_INFO]
 MODEL_PATH = os.path.join(MODEL_DIR, "web_random_forest.pkl")
 SCALER_PATH = os.path.join(MODEL_DIR, "web_scaler.pkl")
+
+
+def _load_feature_ranges() -> Dict[str, Dict[str, float]]:
+    """Load min/max ranges for the selected fields from the raw Ames dataset."""
+
+    df = load_housing_data("data/AmesHousing.csv")
+
+    ranges: Dict[str, Dict[str, float]] = {}
+    for info in FEATURE_INFO:
+        series = df[info["raw"]].dropna()
+        ranges[info["name"]] = {
+            "min": float(series.min()),
+            "max": float(series.max()),
+        }
+
+    return ranges
+
+
+RANGES = _load_feature_ranges()
+FIELDS = {
+    info["name"]: {
+        "label": f"{info['label']} (Khoảng dữ liệu: {int(RANGES[info['name']]['min'])} – {int(RANGES[info['name']]['max'])})",
+        "min": RANGES[info["name"]]["min"],
+        "max": RANGES[info["name"]]["max"],
+        "step": 1,
+    }
+    for info in FEATURE_INFO
+}
 
 
 def _train_model() -> Tuple[RandomForestRegressor, StandardScaler]:
@@ -74,9 +150,18 @@ TEMPLATE = """
   <div class=\"container\">
     <h2>Demo dự đoán giá nhà (Random Forest)</h2>
     <form method=\"POST\" action=\"/predict\">
-      {% for key, label in fields.items() %}
-        <label for=\"{{ key }}\">{{ label }}</label>
-        <input type=\"number\" step=\"0.01\" name=\"{{ key }}\" id=\"{{ key }}\" required value=\"{{ request.form.get(key, '') }}\" />
+      {% for key, meta in fields.items() %}
+        <label for=\"{{ key }}\">{{ meta.label }}</label>
+        <input
+          type=\"number\"
+          name=\"{{ key }}\"
+          id=\"{{ key }}\"
+          step=\"{{ meta.step }}\"
+          min=\"{{ meta.min }}\"
+          max=\"{{ meta.max }}\"
+          required
+          value=\"{{ request.form.get(key, '') }}\"
+        />
       {% endfor %}
       <button type=\"submit\">Dự đoán</button>
     </form>
@@ -93,13 +178,7 @@ TEMPLATE = """
 def index():
     return render_template_string(
         TEMPLATE,
-        fields={
-            "Gr_Liv_Area": "Diện tích ở (Gr Liv Area, sqft)",
-            "Overall_Qual": "Chất lượng tổng thể (Overall Qual)",
-            "Garage_Cars": "Số chỗ để xe (Garage Cars)",
-            "Total_Bsmt_SF": "Diện tích tầng hầm (Total Bsmt SF)",
-            "1st_Flr_SF": "Diện tích tầng 1 (1st Flr SF)",
-        },
+        fields=FIELDS,
         prediction=None,
     )
 
@@ -119,13 +198,7 @@ def predict():
 
     return render_template_string(
         TEMPLATE,
-        fields={
-            "Gr_Liv_Area": "Diện tích ở (Gr Liv Area, sqft)",
-            "Overall_Qual": "Chất lượng tổng thể (Overall Qual)",
-            "Garage_Cars": "Số chỗ để xe (Garage Cars)",
-            "Total_Bsmt_SF": "Diện tích tầng hầm (Total Bsmt SF)",
-            "1st_Flr_SF": "Diện tích tầng 1 (1st Flr SF)",
-        },
+        fields=FIELDS,
         prediction=y_pred,
     )
 
