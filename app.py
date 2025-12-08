@@ -121,7 +121,14 @@ def load_model() -> Tuple[RandomForestRegressor, StandardScaler]:
     if os.path.exists(MODEL_PATH) and os.path.exists(SCALER_PATH):
         model = joblib.load(MODEL_PATH)
         meta = joblib.load(SCALER_PATH)
-        return model, meta["scaler"]
+        saved_features = meta.get("features")
+        saved_scaler = meta.get("scaler")
+
+        if saved_features != FEATURES or saved_scaler is None:
+            # Artifacts are stale or corrupted — retrain to avoid runtime errors
+            return _train_model()
+
+        return model, saved_scaler
 
     return _train_model()
 
@@ -168,6 +175,9 @@ TEMPLATE = """
     {% if prediction is not none %}
       <div class=\"result\">Giá dự đoán: <strong>${{ '{:,.0f}'.format(prediction) }}</strong></div>
     {% endif %}
+    {% if error %}
+      <div class=\"result\" style=\"background: #fef2f2; color: #991b1b; border-color: #fecdd3;\">{{ error }}</div>
+    {% endif %}
   </div>
 </body>
 </html>
@@ -180,11 +190,13 @@ def index():
         TEMPLATE,
         fields=FIELDS,
         prediction=None,
+        error=None,
     )
 
 
 @app.route("/predict", methods=["POST"])
 def predict():
+    error = None
     values = []
     for feature in FEATURES:
         raw_val = request.form.get(feature)
@@ -193,13 +205,22 @@ def predict():
         except (TypeError, ValueError):
             values.append(0.0)
 
-    scaled = scaler.transform(np.array(values).reshape(1, -1))
-    y_pred = model.predict(scaled)[0]
+    expected_features = getattr(scaler, "n_features_in_", len(values))
+    if expected_features != len(values):
+        error = (
+            "Model artifacts không khớp với danh sách thuộc tính hiện tại. "
+            "Vui lòng xóa file trong thư mục models/ để ứng dụng tự huấn luyện lại."
+        )
+        y_pred = None
+    else:
+        scaled = scaler.transform(np.array(values).reshape(1, -1))
+        y_pred = model.predict(scaled)[0]
 
     return render_template_string(
         TEMPLATE,
         fields=FIELDS,
         prediction=y_pred,
+        error=error,
     )
 
 
