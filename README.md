@@ -1,27 +1,36 @@
-# House Price Prediction Demo
+# 🧪 Đồ án môn Kiểm thử phần mềm (KTPM)
 
-Ứng dụng web Flask cho phép nhập các thuộc tính nhà ở (Ames Housing) và dự đoán giá bằng mô hình Random Forest.
+Repository này được sử dụng để quản lý mã nguồn, tài liệu và tiến độ làm **Đồ án môn Kiểm thử phần mềm** của nhóm gồm **4 thành viên**.  
+Mục tiêu là thực hành các kỹ thuật kiểm thử, xây dựng test case và rèn luyện kỹ năng làm việc nhóm.
 
-## Yêu cầu môi trường
-- Python 3.9+
-- Dataset `data/AmesHousing.csv` (đã có sẵn trong repo)
-- Thư viện: `pip install -r requirements.txt`
+---
 
-## Cách chạy demo
-1. Cài đặt phụ thuộc:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Khởi động ứng dụng (tự động huấn luyện hoặc tải model đã lưu):
-   ```bash
-   python app.py
-   ```
-3. Mở trình duyệt tới `http://localhost:5000` và nhập các trường:
-   - Gr_Liv_Area (diện tích sử dụng)
-   - Overall_Qual (chất lượng tổng thể)
-   - Garage_Cars (số chỗ để xe)
-   - Total_Bsmt_SF (diện tích tầng hầm)
-   - 1st_Flr_SF (diện tích tầng 1)
-4. Nhấn **Dự đoán** để xem giá ước tính.
+## 👥 Thành viên nhóm & Vai trò
 
-Model và scaler được lưu tại thư mục `models/` sau lần chạy đầu để sử dụng lại.
+| Họ và tên              | MSSV       | Vai trò chính       | Vai trò phụ             | Nhiệm vụ |
+|------------------------|------------|---------------------|-------------------------|---------------------------------------------------|
+| **Lý Kim Thúy**        | 3122411199 | Backend Developer   | Leader / Tester         | Quản lý nhóm, thiết kế kiến trúc, phát triển API, hỗ trợ viết test API |
+| **Tô Thảo Nhi**        | 3122411139 | Tester              | Frontend Developer      | Viết & chạy test case, kiểm thử giao diện, hỗ trợ phát triển UI |
+| **Đỗ Gia Huy**         | 3122411062 | Tester              | BA / Document Writer    | Thiết kế test scenario, test plan, viết báo cáo kiểm thử, phân tích yêu cầu |
+| **Nguyễn Võ Minh Hiếu**| 3122411057 | Frontend Developer  | Tester                  | Phát triển giao diện, kiểm thử chức năng, hỗ trợ viết test case |
+
+---
+
+
+## 🎯 Mục tiêu môn học
+- Hiểu và áp dụng **các mức kiểm thử**: Unit test, Integration test, System test, Acceptance test.  
+- Thực hành **kiểm thử hộp đen, hộp trắng**.  
+- Thiết kế **test case, test scenario, test plan**.  
+- Sử dụng công cụ hỗ trợ kiểm thử (JUnit, Selenium, Postman, …).  
+- Báo cáo kết quả kiểm thử và đánh giá chất lượng phần mềm.  
+
+---
+
+## 🛠 Công nghệ & Công cụ dự kiến
+- **Ngôn ngữ lập trình**: JavaScript  
+- **Backend**: Node.js  
+- **Frontend**: ReactJS  
+- **Cơ sở dữ liệu**: MySQL  
+- **Công cụ kiểm thử**: Postman 
+
+---
