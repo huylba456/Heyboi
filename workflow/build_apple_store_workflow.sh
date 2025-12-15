@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
 # Build AppleStore Workflow.xlsx from the extracted OpenXML contents to avoid committing binary artifacts.
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SOURCE_DIR="$ROOT_DIR/workflow/apple_store"
-OUTPUT_FILE="$ROOT_DIR/AppleStore Workflow.xlsx"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
 
-cd "$SOURCE_DIR"
-rm -f "$OUTPUT_FILE"
-zip -qr "$OUTPUT_FILE" .
-echo "Generated: $OUTPUT_FILE"
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+  if command -v python >/dev/null 2>&1; then
+    PYTHON_BIN=python
+  else
+    echo "Python is required to build the workflow package. Install Python 3 and retry." >&2
+    exit 1
+  fi
+fi
 
+"$PYTHON_BIN" "$ROOT_DIR/workflow/build_apple_store_workflow.py"
