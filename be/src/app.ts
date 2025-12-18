@@ -14,7 +14,11 @@ const app = express()
 
 
 require('dotenv').config()
-const port = process.env.PORT || 3002
+const port = process.env.PORT || 8888
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean)
 
 app.set('view engine', 'ejs')
 app.set('views', __dirname + '/views')
@@ -40,7 +44,12 @@ app.use((req, res, next) => {
 
 //cors
 app.use(cors({
-    origin: ["http://localhost:3000"],
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'), false);
+    },
     credentials: true,
 }));
 
