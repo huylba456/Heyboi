@@ -134,24 +134,27 @@ const ProductManagement = () => {
     const handleSave = async () => {
         try {
             const values = await form.validateFields();
-            console.log("Form values:", values);
+            if (!values.variants || values.variants.length === 0) {
+                message.error("Product must have at least one variant");
+                return;
+            }
             if (selectedProduct) {
-                // EDIT PRODUCT
                 await updateProduct(selectedProduct.id, values);
                 message.success("Product updated successfully");
             } else {
-                // ADD PRODUCT
                 await createProduct(values);
                 message.success("Product created successfully");
             }
 
             setIsModalOpen(false);
-            fetchProducts(); // reload list
+            fetchProducts();
         } catch (error) {
-            console.error("Save failed", error);
+            console.error(error);
             message.error("Failed to save product");
         }
     };
+
+
 
     const columns = [
         {
@@ -307,6 +310,18 @@ const ProductManagement = () => {
                     ]}
                     style={{ width: 150 }}
                 />
+                <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => {
+                        setSelectedProduct(null);
+                        form.resetFields();
+                        setIsModalOpen(true);
+                    }}
+                >
+                    Add Product
+                </Button>
+
             </Space>
 
 
@@ -448,6 +463,7 @@ const ProductManagement = () => {
                                                 <Select.Option value={false}>Hidden</Select.Option>
                                             </Select>
                                         </Form.Item>
+
 
                                     </Space>
                                 ))}
