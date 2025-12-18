@@ -14,7 +14,7 @@ const app = express()
 
 
 require('dotenv').config()
-const port = process.env.PORT || 3002
+const port = process.env.PORT || 8888
 const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000')
   .split(',')
   .map((o) => o.trim())

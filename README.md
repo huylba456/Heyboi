@@ -74,11 +74,18 @@ Mục tiêu là thực hành các kỹ thuật kiểm thử, xây dựng test ca
    ```bash
    docker compose up -d --build
    ```
-4. Sau khi dịch vụ khởi động:
+4. Seed dữ liệu (cần thiết để backend hoạt động đầy đủ):  
+   ```bash
+   docker compose exec backend npx prisma db seed
+   # hoặc nếu bạn quen dùng docker exec:
+   # docker exec -it ktpm_final-backend-1 npx prisma db seed
+   ```
+5. Sau khi dịch vụ khởi động:
    - Backend: http://localhost:8888  
    - Frontend: http://localhost:3000 (hoặc http://localhost:5173 nếu bạn giữ nguyên cấu hình port mặc định của Vite)  
    - MySQL: host `localhost`, port `3307`, user `root`, password `123123`, database `ktpm_final`
    - Nếu backend không kết nối được DB, kiểm tra lại `DATABASE_URL` trong `docker-compose.yml` (nên để `mysql://root:123123@db:3306/ktpm_final`)
+   - Nếu gặp lỗi 502, đảm bảo backend đang lắng nghe port `8888` (mặc định đã cấu hình) hoặc đặt biến môi trường `PORT=8888` cho service backend.
 
 #### Triển khai lên VPS/Server
 - Yêu cầu: máy chủ có Docker & Docker Compose, mở port public cho dịch vụ bạn muốn công khai (thường là 80/443 qua reverse proxy).
